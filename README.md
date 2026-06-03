@@ -1,5 +1,7 @@
 # Obsidian Codex Memory
 
+[中文说明](README.zh-CN.md)
+
 Use an Obsidian vault as long-term memory for Codex.
 
 This is a **Codex plugin**, not an Obsidian community plugin. It lets Codex read a compact memory note, append session summaries, and optionally sync the memory note through a Git-backed Obsidian vault.
