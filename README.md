@@ -14,7 +14,7 @@
 - 支持按关键词检索 1-3 条相关历史日志，适合节省 token。
 - 追加简洁的 Codex 会话总结。
 - 支持通过 `OBSIDIAN_VAULT` 或本地配置指定任意 vault 路径。
-- 可以只同步记忆文件到 GitHub，同时让其他 vault 差异以 GitHub 为准。
+- 可以只同步 Codex 记忆文件到 GitHub。
 - 默认不记录 API key、密码、token 等敏感信息；但在同步敏感工作前，仍建议你检查总结内容。
 
 ## 一行安装
@@ -143,7 +143,7 @@ python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py init --vault 
 - `Codex/Codex 会话总结.md`
 - `Codex/MACOS_CODEX_OBSIDIAN_MEMORY.md`
 
-其他本地 vault 差异会在同步时恢复为 GitHub 版本。你的 vault 必须已经是 Git 仓库，并且配置好了 `origin`。
+插件只面向 Codex 记忆文件，不负责管理整个 Obsidian vault。你的 vault 必须已经是 Git 仓库，并且配置好了 `origin`。
 
 在新的 vault 上第一次同步前，建议先运行：
 

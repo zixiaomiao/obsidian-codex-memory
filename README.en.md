@@ -14,7 +14,7 @@ This is a **Codex plugin**, not an Obsidian community plugin. It lets Codex read
 - Retrieves 1-3 relevant history blocks by keyword to save tokens.
 - Appends compact Codex session summaries.
 - Supports any vault path through `OBSIDIAN_VAULT` or a saved local config.
-- Can selectively sync memory files to GitHub while keeping other vault differences aligned with GitHub.
+- Can selectively sync Codex memory files to GitHub.
 - Avoids recording credentials or secrets by design; you should still review summaries before syncing sensitive work.
 
 ## One-line install
@@ -141,7 +141,7 @@ After installation, open Codex and enable **Obsidian Codex Memory** from the per
 - Allowed local-over-remote memory files:
   - `Codex/Codex 会话总结.md`
   - `Codex/MACOS_CODEX_OBSIDIAN_MEMORY.md`
-- Other local vault differences are restored from GitHub during sync.
+- The plugin is focused on Codex memory files. It is not a full Obsidian vault manager.
 - The vault must already be a Git repository with `origin` configured.
 
 Always run `sync-github --dry-run` before real sync when using a new vault.

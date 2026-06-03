@@ -164,10 +164,9 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 - 当前 Obsidian vault：`{vault}`
 - 主会话总结相对路径：`{rel.as_posix()}`
 - GitHub 仓库：未配置；如果 vault 是 Git 仓库，使用 `git remote -v` 确认远程和分支。
-- Obsidian 主分类：按用户自己的 vault 结构为准；常见可用分类包括 AI 编程、AI 绘画、工作、网络、硬件、游戏、个人、其他。
 - 用户偏好：先完成任务，再写 Obsidian 总结；回答尽量直接、少废话。
 - 记忆读取策略：默认只读本节和用户当前消息；按任务关键词检索相关条目；不要默认展开全部历史。
-- 同步策略：记忆文件用本地版本覆盖；其他 vault 差异以 GitHub 仓库为准。
+- 同步策略：只同步 Codex 记忆文件；不要把插件当作完整 Obsidian vault 管理工具。
 - 安全规则：不记录 API key、密码、token、订阅原文等敏感信息。
 - Codex 主要插件：`obsidian-codex-memory`。
 
@@ -185,7 +184,7 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 
 关键词：`obsidian`、`vault-structure`、`git/github`、`sync`、`github-sync`、`iCloud`、`obsidian-git`、`dataview`
 
-用途：仓库路径、分类结构、GitHub 同步、iCloud 多端同步、Obsidian 社区插件状态。
+用途：Codex 记忆文件路径、GitHub 同步、iCloud 多端同步、Obsidian 社区插件状态。
 
 ### Codex 记忆与插件
 
@@ -346,11 +345,9 @@ def sync_github(dry_run: bool = False, branch: str = "main") -> None:
         return
 
     if disallowed:
-        print("Discarding non-memory local differences in favor of GitHub:")
+        print("Leaving non-memory local differences unchanged:")
         for p in disallowed:
             print(f"- {p}")
-        run(["git", "restore", "--", *disallowed], cwd=vault)
-        run(["git", "clean", "-fd"], cwd=vault)
 
     run(["git", "pull", "--ff-only", "origin", branch], cwd=vault)
     remaining = run(["git", "status", "--porcelain"], cwd=vault).stdout.strip()

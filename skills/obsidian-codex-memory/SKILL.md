@@ -71,4 +71,4 @@ python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py sync-github
 - Complete the user's task before writing a memory summary.
 - Keep new summaries within 5 lines when possible.
 - Prefer UTF-8 direct file writes. Avoid shell pipelines that can corrupt Chinese text.
-- For GitHub sync, only the allowed memory files may overwrite remote; all other local differences should follow GitHub.
+- For GitHub sync, only Codex memory files should be staged and committed. Do not treat this plugin as a full Obsidian vault manager.
