@@ -11,8 +11,9 @@ For the future optimization plan, see [ROADMAP.md](ROADMAP.md).
 ## What it does
 
 - Reads `Codex/Codex 会话总结.md` from your Obsidian vault.
+- Generates `Codex/project-summary.md` from the session summary.
 - Creates a generic startup memory template during initialization when the memory note is missing.
-- Reads only startup rules, reading strategy, indexes, and fixed paths by default instead of expanding full history.
+- Prioritizes the project summary, then reads startup rules, reading strategy, indexes, and fixed paths by default instead of expanding full history.
 - Retrieves 1-3 relevant history blocks by keyword to save tokens.
 - Appends compact Codex session summaries.
 - Supports any vault path through `OBSIDIAN_VAULT` or a saved local config.
@@ -68,6 +69,12 @@ Read compact memory:
 python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py read
 ```
 
+Generate or refresh the project summary:
+
+```bash
+python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py project-summary
+```
+
 Read relevant history by keywords, up to 3 blocks by default:
 
 ```bash
@@ -106,6 +113,12 @@ The default memory note is:
 Codex/Codex 会话总结.md
 ```
 
+The default project summary is:
+
+```text
+Codex/project-summary.md
+```
+
 Inside the vault, this means:
 
 ```text
@@ -133,7 +146,7 @@ The template does not hard-code another user's local paths. It records the curre
 
 The plugin defaults to this reading logic:
 
-- Ordinary tasks: read only startup rules and the current user message.
+- Ordinary tasks: read `Codex/project-summary.md` first, then startup rules and the current user message.
 - Obsidian/GitHub/sync tasks: also query `obsidian`, `sync`, `git/github`, `github-sync`, and similar terms.
 - Plugin/memory tasks: also query `codex/plugin`, `codex/memory`, `obsidian-codex-memory`, and similar terms.
 - Retrospectives: read only 1-3 matched history blocks.
@@ -170,6 +183,7 @@ After installation, open Codex and enable **Obsidian Codex Memory** from the per
 
 - Allowed local-over-remote memory files:
   - `Codex/Codex 会话总结.md`
+  - `Codex/project-summary.md`
   - `Codex/MACOS_CODEX_OBSIDIAN_MEMORY.md`
 - The plugin is focused on Codex memory files. It is not a full Obsidian vault manager.
 - The vault must already be a Git repository with `origin` configured.

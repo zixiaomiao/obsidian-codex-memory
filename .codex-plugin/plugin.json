@@ -1,6 +1,6 @@
 {
   "name": "obsidian-codex-memory",
-  "version": "0.2.0+codex.20260603033304",
+  "version": "0.2.0+codex.20260603081015",
   "description": "Read and update Codex memory notes in the user's Obsidian vault.",
   "author": {
     "name": "zixiaomiao"

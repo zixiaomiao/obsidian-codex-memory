@@ -13,11 +13,13 @@ from typing import List, Optional
 
 APP_NAME = "obsidian-codex-memory"
 DEFAULT_MEMORY_REL = Path("Codex/Codex 会话总结.md")
+DEFAULT_PROJECT_SUMMARY_REL = Path("Codex/project-summary.md")
 DEFAULT_EXTRA_MEMORY_REL = Path("Codex/MACOS_CODEX_OBSIDIAN_MEMORY.md")
 STARTUP_HEADING = "## 启动必读"
 LOGS_HEADING = "## 会话日志"
 ALLOWED_OVERWRITE = {
     DEFAULT_MEMORY_REL.as_posix(),
+    DEFAULT_PROJECT_SUMMARY_REL.as_posix(),
     DEFAULT_EXTRA_MEMORY_REL.as_posix(),
 }
 
@@ -111,6 +113,15 @@ def memory_path() -> Path:
     return vault_path() / memory_rel()
 
 
+def project_summary_rel() -> Path:
+    configured = os.environ.get("OBSIDIAN_CODEX_PROJECT_SUMMARY_REL") or load_config().get("project_summary_rel")
+    return Path(configured) if configured else DEFAULT_PROJECT_SUMMARY_REL
+
+
+def project_summary_path() -> Path:
+    return vault_path() / project_summary_rel()
+
+
 def run(cmd: list, cwd: Optional[Path] = None, check: bool = True) -> subprocess.CompletedProcess:
     result = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
     if check and result.returncode != 0:
@@ -162,10 +173,11 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 - 启动时先判断当前系统；读取当前系统对应的 Obsidian vault。
 - 当前系统：`{current_system_name()}`
 - 当前 Obsidian vault：`{vault}`
+- 项目摘要相对路径：`{DEFAULT_PROJECT_SUMMARY_REL.as_posix()}`
 - 主会话总结相对路径：`{rel.as_posix()}`
 - GitHub 仓库：未配置；如果 vault 是 Git 仓库，使用 `git remote -v` 确认远程和分支。
 - 用户偏好：先完成任务，再写 Obsidian 总结；回答尽量直接、少废话。
-- 记忆读取策略：默认只读本节和用户当前消息；按任务关键词检索相关条目；不要默认展开全部历史。
+- 记忆读取策略：启动时优先读取项目摘要；再读本节和用户当前消息；按任务关键词检索相关条目；不要默认展开全部历史。
 - 同步策略：只同步 Codex 记忆文件；不要把插件当作完整 Obsidian vault 管理工具。
 - 安全规则：不记录 API key、密码、token、订阅原文等敏感信息。
 - Codex 主要插件：`obsidian-codex-memory`。
@@ -173,6 +185,7 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 ## 读取策略
 
 - 普通任务：只读“启动必读”和用户当前消息。
+- 项目任务：优先读取 `Codex/project-summary.md`。
 - Obsidian/GitHub/同步任务：再检索 `obsidian`、`sync`、`git/github`、`github-sync`、`vault-structure`。
 - 插件/记忆任务：再检索 `codex/plugin`、`codex/memory`、`obsidian-codex-memory`。
 - 旧问题复盘：只读取命中的 1-3 个历史日志块。
@@ -195,6 +208,7 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 ## 固定路径索引
 
 - 当前 Obsidian vault：`{vault}`
+- 当前项目摘要：`{vault / DEFAULT_PROJECT_SUMMARY_REL}`
 - 当前主会话总结：`{vault / rel}`
 - 当前 Codex 记忆插件：自动安装到用户本机插件目录，通常是 `~/plugins/obsidian-codex-memory`。
 
@@ -226,9 +240,10 @@ def section(text: str, heading: str) -> str:
 
 
 def split_logs(text: str) -> List[str]:
-    logs = section(text, LOGS_HEADING)
-    if not logs:
+    start = text.find(LOGS_HEADING)
+    if start == -1:
         return []
+    logs = text[start:].strip()
     parts = logs.split("\n### ")
     if len(parts) <= 1:
         return []
@@ -249,6 +264,174 @@ def matched_logs(text: str, query: str, limit: int) -> List[str]:
     return list(reversed(matches))
 
 
+def clean_summary_lines(block: str) -> List[str]:
+    lines = []
+    capture = False
+    for raw in block.splitlines():
+        line = raw.strip()
+        if line == "摘要：":
+            capture = True
+            continue
+        if line.startswith(("标签：", "来源：", "关键词：")):
+            continue
+        if capture and line:
+            lines.append(line.replace("\\n", " "))
+    return lines
+
+
+def log_timestamp(block: str) -> str:
+    first = block.splitlines()[0].strip() if block.splitlines() else ""
+    return first.replace("###", "").strip()
+
+
+def log_keywords(block: str) -> str:
+    for raw in block.splitlines():
+        line = raw.strip()
+        if line.startswith("关键词："):
+            return line.replace("关键词：", "", 1).strip()
+    return ""
+
+
+def compact_line(value: str, limit: int = 140) -> str:
+    compact = " ".join(value.replace("\\n", " ").split())
+    return compact[: limit - 1] + "…" if len(compact) > limit else compact
+
+
+def infer_project_name(text: str, fallback: str) -> str:
+    candidates = [
+        "obsidian-codex-memory",
+        "Obsidian Codex Memory",
+        "Codex Memory",
+    ]
+    for candidate in candidates:
+        if candidate.lower() in text.lower():
+            return "Obsidian Codex Memory"
+    return fallback
+
+
+def detect_terms(text: str, mapping: dict) -> List[str]:
+    found = []
+    lower = text.lower()
+    for label, terms in mapping.items():
+        if any(term.lower() in lower for term in terms):
+            found.append(label)
+    return found
+
+
+def generate_project_summary(project_name: str = "", output_rel: Optional[str] = None, max_logs: int = 12) -> Path:
+    source_path = memory_path()
+    if not source_path.exists():
+        raise SystemExit(f"Memory note not found: {source_path}")
+
+    text = source_path.read_text(encoding="utf-8")
+    logs = split_logs(text)
+    recent_logs = logs[-max_logs:] if max_logs > 0 else logs
+    combined = "\n\n".join(recent_logs) or text
+    name = project_name or infer_project_name(combined, vault_path().name)
+
+    tech_stack = detect_terms(
+        combined,
+        {
+            "Codex plugin": ["codex plugin", "codex 插件", ".codex-plugin", "plugin.json"],
+            "Python": ["python", "obsidian_memory.py", "py_compile"],
+            "Markdown": ["markdown", "README", "ROADMAP", ".md"],
+            "Git/GitHub": ["git", "github", "release", "tag", "push"],
+            "Shell": ["install.sh", ".command", "bash", "shell"],
+            "PowerShell/Windows CMD": ["powershell", ".cmd", "windows"],
+            "Chrome automation": ["chrome", "release 页面", "浏览器"],
+            "Obsidian": ["obsidian", "vault", "会话总结"],
+        },
+    )
+
+    completed = []
+    decisions = []
+    todos = []
+    for block in recent_logs:
+        ts = log_timestamp(block)
+        keywords = log_keywords(block)
+        summary_lines = clean_summary_lines(block)
+        joined = " ".join(summary_lines)
+        if summary_lines:
+            completed.append(f"- {ts}：{compact_line(summary_lines[0])}")
+        if any(word in joined for word in ["决定", "选择", "策略", "规则", "优先", "默认", "只", "不再", "改为"]):
+            decisions.append(f"- {ts}：{compact_line(joined, 180)}")
+        if any(word.lower() in joined.lower() for word in ["todo", "待办", "规划", "roadmap"]):
+            todos.append(f"- {ts}：{compact_line(joined, 180)}")
+        elif any(word.lower() in keywords.lower() for word in ["roadmap", "todo"]):
+            todos.append(f"- {ts}：{compact_line(joined, 180)}")
+
+    if not todos:
+        todos = [
+            "- 实现更稳定的项目摘要提炼逻辑。",
+            "- 后续推进 Memory 分类、Decision Log、自动归档和 Generate Context。",
+        ]
+
+    project_goal = (
+        "把 Obsidian vault 作为 Codex 的长期记忆，用项目摘要和按需检索减少 token 消耗，"
+        "让 AI 更快理解项目状态、决策和待办。"
+    )
+    current_progress = completed[-1].split("：", 1)[1] if completed else "已建立基础记忆读取、追加、同步和安装流程。"
+    tech_stack_text = "\n".join(f"- {item}" for item in tech_stack) if tech_stack else (
+        "- Markdown-first memory workflow\n"
+        "- Python utility script\n"
+        "- Git/GitHub sync"
+    )
+    completed_text = "\n".join(completed[-8:]) if completed else "- 已创建基础 Codex 会话总结。"
+    todos_text = "\n".join(todos[-6:])
+    decisions_text = "\n".join(decisions[-8:]) if decisions else (
+        "- Markdown 优先，不引入数据库作为默认依赖。\n"
+        "- 默认读取项目摘要和启动必读，不默认展开完整历史。\n"
+        "- 只同步 Codex 记忆文件，不管理整个 Obsidian vault。"
+    )
+
+    now = now_iso()
+    out_rel = Path(output_rel) if output_rel else project_summary_rel()
+    out_path = vault_path() / out_rel
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    body = f"""# Project Summary
+
+updated: {now}
+source: `{source_path.relative_to(vault_path())}`
+
+## 项目名称
+
+{name}
+
+## 项目目标
+
+{project_goal}
+
+## 技术栈
+
+{tech_stack_text}
+
+## 当前进度
+
+{current_progress}
+
+## 已完成任务
+
+{completed_text}
+
+## 待办事项
+
+{todos_text}
+
+## 重要技术决策
+
+{decisions_text}
+
+## 读取建议
+
+- Codex 启动时优先读取本文件。
+- 需要细节时再读取 `Codex/Codex 会话总结.md` 的启动必读和关键词命中的 1-3 条日志。
+- 除非用户明确要求，不要完整读取全部历史。
+"""
+    out_path.write_text(body, encoding="utf-8")
+    print(f"Wrote project summary to {out_path}")
+    return out_path
+
+
 def init(vault: str, memory: Optional[str], create: bool) -> None:
     vault_dir = Path(vault).expanduser().resolve()
     if not vault_dir.exists():
@@ -266,7 +449,7 @@ def init(vault: str, memory: Optional[str], create: bool) -> None:
     print(f"Memory note: {memory_path()}")
 
 
-def read_memory(full: bool = False, query: str = "", logs_limit: int = 3) -> None:
+def read_memory(full: bool = False, query: str = "", logs_limit: int = 3, include_project_summary: bool = True) -> None:
     path = memory_path()
     if not path.exists():
         raise SystemExit(f"Memory note not found: {path}")
@@ -276,6 +459,10 @@ def read_memory(full: bool = False, query: str = "", logs_limit: int = 3) -> Non
         return
 
     sections = []
+    summary_path = project_summary_path()
+    if include_project_summary and summary_path.exists():
+        sections.append(summary_path.read_text(encoding="utf-8").strip())
+
     for heading in [STARTUP_HEADING, "## 读取策略", "## 任务检索索引", "## 固定路径索引"]:
         found = section(text, heading)
         if found:
@@ -377,6 +564,7 @@ def main() -> None:
     read_p.add_argument("--full", action="store_true")
     read_p.add_argument("--query", default="", help="Optional keywords for retrieving 1-3 matching history blocks.")
     read_p.add_argument("--logs-limit", type=int, default=3, help="Maximum matched history blocks to include.")
+    read_p.add_argument("--no-project-summary", action="store_true", help="Do not include Codex/project-summary.md in compact reads.")
 
     append_p = sub.add_parser("append", help="Append a compact memory summary.")
     append_p.add_argument("--summary", required=True)
@@ -388,16 +576,23 @@ def main() -> None:
     sync_p.add_argument("--dry-run", action="store_true")
     sync_p.add_argument("--branch", default="main")
 
+    summary_p = sub.add_parser("project-summary", help="Generate Codex/project-summary.md from the memory note.")
+    summary_p.add_argument("--project-name", default="")
+    summary_p.add_argument("--output-rel", default=None)
+    summary_p.add_argument("--max-logs", type=int, default=12)
+
     args = parser.parse_args()
 
     if args.cmd == "init":
         init(args.vault, args.memory_rel, not args.no_create)
     elif args.cmd == "read":
-        read_memory(args.full, args.query, args.logs_limit)
+        read_memory(args.full, args.query, args.logs_limit, not args.no_project_summary)
     elif args.cmd == "append":
         append_summary(args.summary, args.tags, args.source, args.keywords)
     elif args.cmd == "sync-github":
         sync_github(args.dry_run, args.branch)
+    elif args.cmd == "project-summary":
+        generate_project_summary(args.project_name, args.output_rel, args.max_logs)
 
 
 if __name__ == "__main__":

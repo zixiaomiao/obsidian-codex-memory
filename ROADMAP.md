@@ -7,7 +7,15 @@
 
 ## 第一阶段：Project Summary
 
-优先实现 Project Summary，也就是项目摘要系统。
+Project Summary 是项目摘要系统。当前版本已加入基础命令：
+
+```bash
+python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py project-summary
+```
+
+它会从 `Codex/Codex 会话总结.md` 生成 `Codex/project-summary.md`，作为 Codex 启动时优先读取的低 token 项目上下文。
+
+后续继续增强摘要质量。
 
 插件从记忆库中提炼：
 

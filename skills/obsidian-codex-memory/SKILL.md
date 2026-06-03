@@ -31,10 +31,16 @@ python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py init --vault 
 
 ## Workflow
 
-1. At the start of any task, read token-saving memory before doing substantial work. Default reading should only load startup rules, reading strategy, indexes, fixed paths, and any history blocks explicitly matched by query keywords:
+1. At the start of any task, read token-saving memory before doing substantial work. Default reading should prioritize `Codex/project-summary.md` when present, then load startup rules, reading strategy, indexes, fixed paths, and any history blocks explicitly matched by query keywords:
 
 ```bash
 python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py read
+```
+
+Refresh the project summary after substantial project-memory changes:
+
+```bash
+python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py project-summary
 ```
 
 For Obsidian, GitHub, sync, plugin, memory, or retrospective tasks, pass task keywords and read only 1-3 matching history blocks:
@@ -67,6 +73,7 @@ python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py sync-github
 
 - Do not record API keys, passwords, tokens, or private credentials.
 - Do not dump the entire memory note unless the user asks for full memory.
+- Prefer `Codex/project-summary.md` for project orientation before reading detailed history.
 - For ordinary tasks, use startup memory only. For specialized tasks, query matching history blocks by keywords.
 - Complete the user's task before writing a memory summary.
 - Keep new summaries within 5 lines when possible.
