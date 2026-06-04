@@ -4,6 +4,8 @@ setlocal
 set "REPO_URL=https://github.com/zixiaomiao/codian.git"
 set "PLUGIN_NAME=codian"
 set "PLUGIN_DIR=%USERPROFILE%\plugins\%PLUGIN_NAME%"
+set "CODEX_HOME=%USERPROFILE%\.codex"
+set "SKILL_DIR=%CODEX_HOME%\skills\%PLUGIN_NAME%"
 set "MARKETPLACE_PATH=%USERPROFILE%\.agents\plugins\marketplace.json"
 
 where git >nul 2>nul
@@ -39,6 +41,10 @@ if exist "%PLUGIN_DIR%\.git" (
   git clone "%REPO_URL%" "%PLUGIN_DIR%"
 )
 
+if exist "%SKILL_DIR%" rmdir /s /q "%SKILL_DIR%"
+if not exist "%CODEX_HOME%\skills" mkdir "%CODEX_HOME%\skills"
+xcopy "%PLUGIN_DIR%\skills\%PLUGIN_NAME%" "%SKILL_DIR%\" /E /I /Y >nul
+
 for %%I in ("%MARKETPLACE_PATH%") do if not exist "%%~dpI" mkdir "%%~dpI"
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
@@ -58,6 +64,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
 echo.
 echo Installed Codian.
 echo Plugin path: %PLUGIN_DIR%
+echo Skill path: %SKILL_DIR%
 echo.
 echo Next step:
 echo   Open Codex, enable Codian, then configure your Obsidian vault if needed.

@@ -4,6 +4,8 @@ set -euo pipefail
 REPO_URL="${CODIA_REPO:-https://github.com/zixiaomiao/codian.git}"
 PLUGIN_NAME="codian"
 PLUGIN_DIR="${CODIA_PLUGIN_DIR:-$HOME/plugins/$PLUGIN_NAME}"
+CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+SKILL_DIR="${CODIA_SKILL_DIR:-$CODEX_HOME/skills/$PLUGIN_NAME}"
 MARKETPLACE_PATH="${CODIA_MARKETPLACE:-$HOME/.agents/plugins/marketplace.json}"
 SOURCE_PATH="$PLUGIN_DIR"
 
@@ -32,6 +34,10 @@ elif [ -d "$PLUGIN_DIR" ]; then
 else
   git clone "$REPO_URL" "$PLUGIN_DIR"
 fi
+
+rm -rf "$SKILL_DIR"
+mkdir -p "$(dirname "$SKILL_DIR")"
+cp -R "$PLUGIN_DIR/skills/$PLUGIN_NAME" "$SKILL_DIR"
 
 mkdir -p "$(dirname "$MARKETPLACE_PATH")"
 
@@ -89,6 +95,9 @@ cat <<EOF
 
 Installed $PLUGIN_NAME at:
   $PLUGIN_DIR
+
+Installed Codex skill at:
+  $SKILL_DIR
 
 Next, configure your Obsidian vault if you have not already:
   python3 "$PLUGIN_DIR/scripts/obsidian_memory.py" init --vault "/path/to/your/Obsidian vault"

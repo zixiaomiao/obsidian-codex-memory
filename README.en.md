@@ -139,6 +139,14 @@ python3 ~/plugins/codian/scripts/obsidian_memory.py append --summary "5-8 lines 
 - Python 3
 - A local Obsidian vault
 
+## What the installer does
+
+- Clones or updates this repository at `~/plugins/codian`.
+- Copies `skills/codian` into `~/.codex/skills/codian`.
+- Registers Codian in the Codex personal marketplace.
+
+After installation, Codex can read the standalone skill directly. You can also enable the bundled Codian plugin from the personal marketplace.
+
 ## License
 
 MIT

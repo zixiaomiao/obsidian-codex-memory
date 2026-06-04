@@ -4,6 +4,8 @@ set -e
 REPO_URL="https://github.com/zixiaomiao/codian.git"
 PLUGIN_NAME="codian"
 PLUGIN_DIR="$HOME/plugins/$PLUGIN_NAME"
+CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+SKILL_DIR="$CODEX_HOME/skills/$PLUGIN_NAME"
 MARKETPLACE_PATH="$HOME/.agents/plugins/marketplace.json"
 
 cd "$HOME"
@@ -36,6 +38,10 @@ else
   echo "Downloading plugin..."
   git clone "$REPO_URL" "$PLUGIN_DIR"
 fi
+
+rm -rf "$SKILL_DIR"
+mkdir -p "$(dirname "$SKILL_DIR")"
+cp -R "$PLUGIN_DIR/skills/$PLUGIN_NAME" "$SKILL_DIR"
 
 mkdir -p "$(dirname "$MARKETPLACE_PATH")"
 
@@ -88,6 +94,7 @@ PY
 echo
 echo "Installed Codian."
 echo "Plugin path: $PLUGIN_DIR"
+echo "Skill path: $SKILL_DIR"
 echo
 echo "Next step:"
 echo "  Open Codex, enable Codian, then configure your Obsidian vault if needed."

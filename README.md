@@ -154,10 +154,11 @@ python3 ~/plugins/codian/scripts/obsidian_memory.py append --summary "5-8 行长
 安装脚本会：
 
 - 把这个仓库克隆或更新到 `~/plugins/codian`
+- 把 `skills/codian` 同步安装到 `~/.codex/skills/codian`
 - 创建或更新 `~/.agents/plugins/marketplace.json`
 - 把插件注册到 Codex 的个人插件市场
 
-安装后，打开 Codex，在个人插件市场里启用 **Codian**。
+安装后，Codex 可以直接读取独立 skill；也可以打开 Codex，在个人插件市场里启用 **Codian** 插件。
 
 ## 环境要求
 
