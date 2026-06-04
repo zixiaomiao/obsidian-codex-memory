@@ -1,19 +1,26 @@
-# Obsidian Codex Memory 后续优化规划
+# Codian 后续优化规划
+
+> 旧项目名称 / Former project name: **obsidian-codex-memory**
 
 项目当前已经解决了 Codex 缺乏长期记忆、重复介绍项目、上下文无法跨设备同步的问题。后续优化方向不应该盲目增加复杂功能，而是围绕两个目标展开：
 
 - 让 AI 更快理解项目
 - 进一步减少 token 消耗
 
+补充说明：
+
+- Git 同步能力将从当前插件拆出，后续单独做成独立插件。
+- 当前 `codian` 只负责记忆读取、摘要、分类和追加。
+
 ## 第一阶段：Project Summary
 
 Project Summary 是项目摘要系统。当前版本已加入基础命令：
 
 ```bash
-python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py project-summary
+python3 ~/plugins/codian/scripts/obsidian_memory.py project-summary
 ```
 
-它会从 `Codex/Codex 会话总结.md` 生成 `Codex/project-summary.md`，作为 Codex 启动时优先读取的低 token 项目上下文。
+它会从 `30-Logs-日志/codex-session-summary.md` 生成 `10-Context-上下文/project-summary.md`，作为 Codex 读取入口规则后的低 token 项目上下文。
 
 状态：已完成基础版，后续继续增强摘要质量。
 
@@ -27,27 +34,27 @@ python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py project-summa
 - 待办事项
 - 重要技术决策
 
-生成简洁的 `project-summary.md`。Codex 启动时优先读取摘要，而不是读取全部记忆，从而减少上下文长度并提升理解速度。
+生成简洁的 `10-Context-上下文/project-summary.md`。Codex 先读取 `README.md` 和 `AGENTS.md`，再读取摘要，而不是读取全部记忆，从而减少上下文长度并提升理解速度。
 
 ## 第二阶段：Memory 分类体系
 
 Memory 分类体系将记忆按照不同类别管理，而不是把所有内容堆在一个文件中。当前版本已加入基础命令：
 
 ```bash
-python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py memory-categories
+python3 ~/plugins/codian/scripts/obsidian_memory.py memory-categories
 ```
 
-它会从 `Codex/Codex 会话总结.md` 生成 `Codex/memory/` 下的分类文件。
+它会从 `30-Logs-日志/codex-session-summary.md` 生成 `20-Memory-记忆/` 下的分类文件。
 
 状态：已完成基础版。
 
 当前分类：
 
-- Project
-- Decision
-- Todo
-- Bug
-- User Preference
+- `project.md`
+- `decisions.md`
+- `todos.md`
+- `bugs-and-fixes.md`
+- `user-preferences.md`
 
 这样既方便用户查看，也方便 AI 精准读取相关内容。
 
@@ -59,7 +66,7 @@ python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py memory-catego
 
 状态：未完成。
 
-重点记录“为什么这样做”，而不是只记录“做了什么”。例如：
+重点记录"为什么这样做"，而不是只记录"做了什么"。例如：
 
 - 为什么选择某个框架
 - 为什么放弃某个方案
@@ -121,4 +128,4 @@ python3 ~/plugins/obsidian-codex-memory/scripts/obsidian_memory.py memory-catego
 2. 用户可读、可编辑、可控制。
 3. 优先提升用户体验，而非追求技术复杂度。
 4. 目标不是构建最复杂的 Memory System，而是构建最易用的 AI 第二大脑。
-5. 所有功能都应围绕“让 AI 在最少 token 消耗下最快理解项目”这一核心目标展开。
+5. 所有功能都应围绕"让 AI 在最少 token 消耗下最快理解项目"这一核心目标展开。

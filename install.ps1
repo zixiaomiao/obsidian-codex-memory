@@ -1,9 +1,9 @@
 $ErrorActionPreference = "Stop"
 
-$RepoUrl = if ($env:OBSIDIAN_CODEX_MEMORY_REPO) { $env:OBSIDIAN_CODEX_MEMORY_REPO } else { "https://github.com/zixiaomiao/obsidian-codex-memory.git" }
-$PluginName = "obsidian-codex-memory"
-$PluginDir = if ($env:OBSIDIAN_CODEX_MEMORY_PLUGIN_DIR) { $env:OBSIDIAN_CODEX_MEMORY_PLUGIN_DIR } else { Join-Path $env:USERPROFILE "plugins\$PluginName" }
-$MarketplacePath = if ($env:OBSIDIAN_CODEX_MEMORY_MARKETPLACE) { $env:OBSIDIAN_CODEX_MEMORY_MARKETPLACE } else { Join-Path $env:USERPROFILE ".agents\plugins\marketplace.json" }
+$RepoUrl = if ($env:CODIA_REPO) { $env:CODIA_REPO } else { "https://github.com/zixiaomiao/codian.git" }
+$PluginName = "codian"
+$PluginDir = if ($env:CODIA_PLUGIN_DIR) { $env:CODIA_PLUGIN_DIR } else { Join-Path $env:USERPROFILE "plugins\$PluginName" }
+$MarketplacePath = if ($env:CODIA_MARKETPLACE) { $env:CODIA_MARKETPLACE } else { Join-Path $env:USERPROFILE ".agents\plugins\marketplace.json" }
 $DefaultPluginDir = Join-Path $env:USERPROFILE "plugins\$PluginName"
 $SourcePath = if ($PluginDir -eq $DefaultPluginDir) { "./plugins/$PluginName" } else { $PluginDir }
 
@@ -87,4 +87,4 @@ Write-Host ""
 Write-Host "Next, configure your Obsidian vault if you have not already:"
 Write-Host "  python `"$PluginDir\scripts\obsidian_memory.py`" init --vault `"D:\path\to\your\Obsidian vault`""
 Write-Host ""
-Write-Host "Then enable `"Obsidian Codex Memory`" in Codex."
+Write-Host "Then enable `"Codian`" in Codex."

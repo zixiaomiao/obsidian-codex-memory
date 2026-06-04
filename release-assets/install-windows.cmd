@@ -1,8 +1,8 @@
 @echo off
 setlocal
 
-set "REPO_URL=https://github.com/zixiaomiao/obsidian-codex-memory.git"
-set "PLUGIN_NAME=obsidian-codex-memory"
+set "REPO_URL=https://github.com/zixiaomiao/codian.git"
+set "PLUGIN_NAME=codian"
 set "PLUGIN_DIR=%USERPROFILE%\plugins\%PLUGIN_NAME%"
 set "MARKETPLACE_PATH=%USERPROFILE%\.agents\plugins\marketplace.json"
 
@@ -56,11 +56,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "Write-Host \"Registered $pluginName in $marketplacePath\""
 
 echo.
-echo Installed Obsidian Codex Memory.
+echo Installed Codian.
 echo Plugin path: %PLUGIN_DIR%
 echo.
 echo Next step:
-echo   Open Codex, enable Obsidian Codex Memory, then configure your Obsidian vault if needed.
+echo   Open Codex, enable Codian, then configure your Obsidian vault if needed.
 echo.
 echo Optional vault config command:
 echo   python "%PLUGIN_DIR%\scripts\obsidian_memory.py" init --vault "D:\path\to\your\Obsidian vault"

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import List, Optional
 
 
-APP_NAME = "obsidian-codex-memory"
+APP_NAME = "codian"
 DEFAULT_MEMORY_REL = Path("Codex/Codex 会话总结.md")
 DEFAULT_PROJECT_SUMMARY_REL = Path("Codex/project-summary.md")
 MEMORY_CATEGORY_RELS = {
@@ -33,7 +33,7 @@ ALLOWED_OVERWRITE = {
 
 
 def config_path() -> Path:
-    explicit = os.environ.get("OBSIDIAN_CODEX_MEMORY_CONFIG")
+    explicit = os.environ.get("CODIA_CONFIG")
     if explicit:
         return Path(explicit).expanduser()
     if platform.system() == "Windows":
@@ -113,7 +113,7 @@ def vault_path() -> Path:
 
 
 def memory_rel() -> Path:
-    configured = os.environ.get("OBSIDIAN_CODEX_MEMORY_REL") or load_config().get("memory_rel")
+    configured = os.environ.get("CODIA_MEMORY_REL") or load_config().get("memory_rel")
     return Path(configured) if configured else DEFAULT_MEMORY_REL
 
 
@@ -122,7 +122,7 @@ def memory_path() -> Path:
 
 
 def project_summary_rel() -> Path:
-    configured = os.environ.get("OBSIDIAN_CODEX_PROJECT_SUMMARY_REL") or load_config().get("project_summary_rel")
+    configured = os.environ.get("CODIA_PROJECT_SUMMARY_REL") or load_config().get("project_summary_rel")
     return Path(configured) if configured else DEFAULT_PROJECT_SUMMARY_REL
 
 
@@ -211,7 +211,7 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 - 记忆读取策略：启动时优先读取项目摘要；再读本节和用户当前消息；按任务关键词检索相关条目；不要默认展开全部历史。
 - 同步策略：只同步 Codex 记忆文件；不要把插件当作完整 Obsidian vault 管理工具。
 - 安全规则：不记录 API key、密码、token、订阅原文等敏感信息。
-- Codex 主要插件：`obsidian-codex-memory`。
+- Codex 主要插件：`codian`。
 
 ## 读取策略
 
@@ -219,7 +219,7 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 - 项目任务：优先读取 `Codex/project-summary.md`。
 - 分类读取：按任务类型读取 `Codex/memory/Project.md`、`Decision.md`、`Todo.md`、`Bug.md`、`User-Preference.md`。
 - Obsidian/GitHub/同步任务：再检索 `obsidian`、`sync`、`git/github`、`github-sync`、`vault-structure`。
-- 插件/记忆任务：再检索 `codex/plugin`、`codex/memory`、`obsidian-codex-memory`。
+- 插件/记忆任务：再检索 `codex/plugin`、`codex/memory`、`codian`。
 - 旧问题复盘：只读取命中的 1-3 个历史日志块。
 - 除非用户要求“完整读取记忆”，否则不要读取整篇会话总结。
 
@@ -233,7 +233,7 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 
 ### Codex 记忆与插件
 
-关键词：`codex/memory`、`codex/plugin`、`obsidian-codex-memory`、`token-saving`、`optimization`、`self-learning`
+关键词：`codex/memory`、`codex/plugin`、`codian`、`token-saving`、`optimization`、`self-learning`
 
 用途：长期记忆读取规则、会话总结写入、插件脚本、token 节省策略。
 
@@ -243,7 +243,7 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 - 当前项目摘要：`{vault / DEFAULT_PROJECT_SUMMARY_REL}`
 - 当前记忆分类目录：`{vault / "Codex/memory"}`
 - 当前主会话总结：`{vault / rel}`
-- 当前 Codex 记忆插件：自动安装到用户本机插件目录，通常是 `~/plugins/obsidian-codex-memory`。
+- 当前 Codex 记忆插件：自动安装到用户本机插件目录，通常是 `~/plugins/codian`。
 
 ## 历史归档说明
 
@@ -332,13 +332,13 @@ def compact_line(value: str, limit: int = 140) -> str:
 
 def infer_project_name(text: str, fallback: str) -> str:
     candidates = [
-        "obsidian-codex-memory",
-        "Obsidian Codex Memory",
+        "codian",
+        "Codian",
         "Codex Memory",
     ]
     for candidate in candidates:
         if candidate.lower() in text.lower():
-            return "Obsidian Codex Memory"
+            return "Codian"
     return fallback
 
 
