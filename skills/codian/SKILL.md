@@ -27,7 +27,7 @@ Or reference by relative path from the skill directory:
 The vault path is resolved in this order (tiered fallback):
 1. `OBSIDIAN_VAULT` environment variable
 2. `~/.config/codian/config.json` — `{"vault": "/path/to/vault"}`
-3. Auto-discovery: scans common paths for `.obsidian/` directories, prefers the one with `AGENTS.md` + `30-Logs-日志/codex-session-summary.md`
+3. Auto-discovery: scans common paths for `.obsidian/` directories, prefers the one with `codian/AGENTS.md` + `codian/30-Logs-日志/codex-session-summary.md`
 
 ## Workflow
 
@@ -83,14 +83,15 @@ python3 <skill_dir>/scripts/obsidian_memory.py memory-categories --max-logs 80
 The Obsidian vault uses this directory layout:
 
 ```
-README.md                     # Entry point
-AGENTS.md                     # Codex behavior rules
-00-入口/                       # Quick navigation
-10-Context-上下文/              # Project summary, paths
-20-Memory-记忆/                # Categorized: decisions, todos, bugs, preferences
-30-Logs-日志/                  # Session summaries (chronological)
-40-Workflows-工作流/            # Workflow configurations
-90-Archive-归档/               # Archive
+codian/                       # Codian memory root created in the Obsidian vault
+  README.md                   # Entry point
+  AGENTS.md                   # Codex behavior rules
+  00-入口/                     # Quick navigation
+  10-Context-上下文/            # Project summary, paths
+  20-Memory-记忆/              # Categorized: decisions, todos, bugs, preferences
+  30-Logs-日志/                # Session summaries (chronological)
+  40-Workflows-工作流/          # Workflow configurations
+  90-Archive-归档/             # Archive
 ```
 
 ## Trigger Keywords

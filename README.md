@@ -15,34 +15,35 @@
 默认 Codex 记忆仓库结构：
 
 ```text
-README.md
-AGENTS.md
-00-入口/
-10-Context-上下文/
-  project-summary.md
-  fixed-path-index.md
-20-Memory-记忆/
-  project.md
-  decisions.md
-  todos.md
-  bugs-and-fixes.md
-  user-preferences.md
-  lessons.md
-30-Logs-日志/
-  codex-session-summary.md
-40-Workflows-工作流/
-  codex-memory-workflow.md
-90-Archive-归档/
+codian/
+  README.md
+  AGENTS.md
+  00-入口/
+  10-Context-上下文/
+    project-summary.md
+    fixed-path-index.md
+  20-Memory-记忆/
+    project.md
+    decisions.md
+    todos.md
+    bugs-and-fixes.md
+    user-preferences.md
+    lessons.md
+  30-Logs-日志/
+    codex-session-summary.md
+  40-Workflows-工作流/
+    codex-memory-workflow.md
+  90-Archive-归档/
 ```
 
-插件只使用上述新结构。
+插件第一次初始化会在 Obsidian vault 根目录创建 `codian/`，后续所有 Codian 记忆文件都写入这个目录。
 
 ## 功能
 
-- 先读取 `README.md` 和 `AGENTS.md`，再读取 `10-Context-上下文/project-summary.md`。
-- 读取 `30-Logs-日志/codex-session-summary.md` 作为完整会话日志。
-- 生成 `20-Memory-记忆/` 下的分类记忆文件。
-- 初始化时自动创建新规则目录、`README.md`、`AGENTS.md` 和工作流文件。
+- 先读取 `codian/README.md` 和 `codian/AGENTS.md`，再读取 `codian/10-Context-上下文/project-summary.md`。
+- 读取 `codian/30-Logs-日志/codex-session-summary.md` 作为完整会话日志。
+- 生成 `codian/20-Memory-记忆/` 下的分类记忆文件。
+- 初始化时自动创建 `codian/` 目录、新规则子目录、`README.md`、`AGENTS.md` 和工作流文件。
 - 默认优先读取入口规则和项目摘要；带关键词时读取匹配分类，再读取启动规则和少量命中日志。
 - 支持按关键词检索 1-3 条相关历史日志，避免每次展开完整历史。
 - 追加简洁的 Codex session summary。
@@ -130,8 +131,8 @@ python3 ~/plugins/codian/scripts/obsidian_memory.py append --summary "5-8 行长
 
 插件默认遵循这套读取逻辑：
 
-- 普通任务：优先读取 `README.md`、`AGENTS.md`、`10-Context-上下文/project-summary.md`，再读"启动必读"和用户当前消息。
-- 分类任务：按关键词读取 `20-Memory-记忆/` 中的匹配分类。
+- 普通任务：优先读取 `codian/README.md`、`codian/AGENTS.md`、`codian/10-Context-上下文/project-summary.md`，再读"启动必读"和用户当前消息。
+- 分类任务：按关键词读取 `codian/20-Memory-记忆/` 中的匹配分类。
 - Obsidian/记忆任务：再检索 `obsidian`、`vault-structure`、`codian` 等关键词。
 - 插件/记忆任务：再检索 `codex/plugin`、`codex/memory`、`codian` 等关键词。
 - 旧问题复盘：只读取命中的 1-3 个历史日志块。
@@ -143,9 +144,9 @@ python3 ~/plugins/codian/scripts/obsidian_memory.py append --summary "5-8 行长
 
 新结构让稳定内容更容易缓存：
 
-- 项目摘要：`10-Context-上下文/project-summary.md`
-- 分类记忆：`20-Memory-记忆/*.md`
-- 长日志：`30-Logs-日志/codex-session-summary.md`
+- 项目摘要：`codian/10-Context-上下文/project-summary.md`
+- 分类记忆：`codian/20-Memory-记忆/*.md`
+- 长日志：`codian/30-Logs-日志/codex-session-summary.md`
 
 简单说：它不是为了和"完全不读记忆"比较，而是把长期记忆成本从上万 token 压到一两千 token，同时保留必要上下文。
 

@@ -15,34 +15,35 @@ See [ROADMAP.md](ROADMAP.md) for planned improvements.
 Default Codex memory vault layout:
 
 ```text
-README.md
-AGENTS.md
-00-入口/
-10-Context-上下文/
-  project-summary.md
-  fixed-path-index.md
-20-Memory-记忆/
-  project.md
-  decisions.md
-  todos.md
-  bugs-and-fixes.md
-  user-preferences.md
-  lessons.md
-30-Logs-日志/
-  codex-session-summary.md
-40-Workflows-工作流/
-  codex-memory-workflow.md
-90-Archive-归档/
+codian/
+  README.md
+  AGENTS.md
+  00-入口/
+  10-Context-上下文/
+    project-summary.md
+    fixed-path-index.md
+  20-Memory-记忆/
+    project.md
+    decisions.md
+    todos.md
+    bugs-and-fixes.md
+    user-preferences.md
+    lessons.md
+  30-Logs-日志/
+    codex-session-summary.md
+  40-Workflows-工作流/
+    codex-memory-workflow.md
+  90-Archive-归档/
 ```
 
-The plugin uses only the layout above.
+On first init, the plugin creates `codian/` at the Obsidian vault root. All later Codian memory files are written under that directory.
 
 ## Features
 
-- Reads `README.md` and `AGENTS.md` first, then `10-Context-上下文/project-summary.md`.
-- Reads `30-Logs-日志/codex-session-summary.md` as the full session log.
-- Generates categorized memory files under `20-Memory-记忆/`.
-- Creates the new directory layout, `README.md`, `AGENTS.md`, and workflow files during init.
+- Reads `codian/README.md` and `codian/AGENTS.md` first, then `codian/10-Context-上下文/project-summary.md`.
+- Reads `codian/30-Logs-日志/codex-session-summary.md` as the full session log.
+- Generates categorized memory files under `codian/20-Memory-记忆/`.
+- Creates the `codian/` directory, the new subdirectory layout, `README.md`, `AGENTS.md`, and workflow files during init.
 - Compact reads prioritize the project summary, then matching categories, startup rules, and a few matched history entries.
 - Supports keyword lookup for 1-3 relevant historical log blocks.
 - Appends compact Codex session summaries.
@@ -126,8 +127,8 @@ python3 ~/plugins/codian/scripts/obsidian_memory.py append --summary "5-8 lines 
 
 ## Token Saving Strategy
 
-- Ordinary tasks: read `README.md`, `AGENTS.md`, and `10-Context-上下文/project-summary.md` first, then startup rules and the current user message.
-- Category tasks: read matching files under `20-Memory-记忆/` by keyword.
+- Ordinary tasks: read `codian/README.md`, `codian/AGENTS.md`, and `codian/10-Context-上下文/project-summary.md` first, then startup rules and the current user message.
+- Category tasks: read matching files under `codian/20-Memory-记忆/` by keyword.
 - Obsidian/memory tasks: search for `obsidian`, `vault-structure`, `codian`.
 - Plugin/memory tasks: search for `codex/plugin`, `codex/memory`, `codian`.
 - Historical review: include only 1-3 matched log blocks.

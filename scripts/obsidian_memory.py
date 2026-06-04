@@ -11,17 +11,18 @@ from typing import List, Optional
 
 
 APP_NAME = "codian"
-DEFAULT_MEMORY_REL = Path("30-Logs-日志/codex-session-summary.md")
-DEFAULT_PROJECT_SUMMARY_REL = Path("10-Context-上下文/project-summary.md")
-DEFAULT_ENTRY_RELS = [Path("README.md"), Path("AGENTS.md")]
+MEMORY_ROOT_REL = Path("codian")
+DEFAULT_MEMORY_REL = MEMORY_ROOT_REL / "30-Logs-日志/codex-session-summary.md"
+DEFAULT_PROJECT_SUMMARY_REL = MEMORY_ROOT_REL / "10-Context-上下文/project-summary.md"
+DEFAULT_ENTRY_RELS = [MEMORY_ROOT_REL / "README.md", MEMORY_ROOT_REL / "AGENTS.md"]
 MEMORY_CATEGORY_RELS = {
-    "Project": Path("20-Memory-记忆/project.md"),
-    "Decision": Path("20-Memory-记忆/decisions.md"),
-    "Todo": Path("20-Memory-记忆/todos.md"),
-    "Bug": Path("20-Memory-记忆/bugs-and-fixes.md"),
-    "User Preference": Path("20-Memory-记忆/user-preferences.md"),
+    "Project": MEMORY_ROOT_REL / "20-Memory-记忆/project.md",
+    "Decision": MEMORY_ROOT_REL / "20-Memory-记忆/decisions.md",
+    "Todo": MEMORY_ROOT_REL / "20-Memory-记忆/todos.md",
+    "Bug": MEMORY_ROOT_REL / "20-Memory-记忆/bugs-and-fixes.md",
+    "User Preference": MEMORY_ROOT_REL / "20-Memory-记忆/user-preferences.md",
 }
-DEFAULT_EXTRA_MEMORY_REL = Path("40-Workflows-工作流/codex-memory-workflow.md")
+DEFAULT_EXTRA_MEMORY_REL = MEMORY_ROOT_REL / "40-Workflows-工作流/codex-memory-workflow.md"
 STARTUP_HEADING = "## 启动必读"
 LOGS_HEADING = "## 会话日志"
 
@@ -80,7 +81,7 @@ def discover_vault() -> Optional[Path]:
                     vaults.append(child)
 
     for vault in vaults:
-        if (vault / "AGENTS.md").exists() and (vault / DEFAULT_MEMORY_REL).exists():
+        if (vault / MEMORY_ROOT_REL / "AGENTS.md").exists() and (vault / DEFAULT_MEMORY_REL).exists():
             return vault
     for vault in vaults:
         if (vault / DEFAULT_MEMORY_REL).exists():
@@ -164,21 +165,22 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 
 - 当前系统：`{current_system_name()}`
 - 当前 Obsidian vault：`{vault}`
+- Codian 记忆根目录：`{MEMORY_ROOT_REL.as_posix()}/`
 - 项目摘要相对路径：`{DEFAULT_PROJECT_SUMMARY_REL.as_posix()}`
-- 记忆分类目录：`20-Memory-记忆/`
+- 记忆分类目录：`{(MEMORY_ROOT_REL / "20-Memory-记忆").as_posix()}/`
 - 主会话总结相对路径：`{rel.as_posix()}`
 - 用户偏好：回答尽量直接，中文为主，少废话；只有用户触发记忆写入关键词时，才进入 Codex 记忆写回流程；写入前需确认记录内容和最终写入文本。
-- 记忆读取策略：进入仓库时先读取 README、AGENTS 和项目摘要；再读本节和用户当前消息；按任务关键词检索相关条目；不要默认展开全部历史。
+- 记忆读取策略：进入仓库时先读取 `codian/README.md`、`codian/AGENTS.md` 和项目摘要；再读本节和用户当前消息；按任务关键词检索相关条目；不要默认展开全部历史。
 - 同步策略：当前插件不负责 Git 同步，只负责记忆读取、摘要、分类和追加。
 - 安全规则：不记录 API key、密码、token、订阅原文等敏感信息。
 - Codex 主要插件：`codian`。
 
 ## 读取策略
 
-- 普通任务：优先读取 `README.md`、`AGENTS.md` 和 `10-Context-上下文/project-summary.md`。
-- 项目任务：优先读取 `10-Context-上下文/project-summary.md`。
-- 分类读取：按任务类型读取 `20-Memory-记忆/project.md`、`decisions.md`、`todos.md`、`bugs-and-fixes.md`、`user-preferences.md`。
-- 工作流任务：读取 `40-Workflows-工作流/codex-memory-workflow.md`。
+- 普通任务：优先读取 `codian/README.md`、`codian/AGENTS.md` 和 `codian/10-Context-上下文/project-summary.md`。
+- 项目任务：优先读取 `codian/10-Context-上下文/project-summary.md`。
+- 分类读取：按任务类型读取 `codian/20-Memory-记忆/project.md`、`decisions.md`、`todos.md`、`bugs-and-fixes.md`、`user-preferences.md`。
+- 工作流任务：读取 `codian/40-Workflows-工作流/codex-memory-workflow.md`。
 - Obsidian/记忆任务：再检索 `obsidian`、`vault-structure`、`codex/memory`、`codian`。
 - 插件/记忆任务：再检索 `codex/plugin`、`codex/memory`、`codian`。
 - 旧问题复盘：只读取命中的 1-3 个历史日志块。
@@ -202,7 +204,7 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 
 - 当前 Obsidian vault：`{vault}`
 - 当前项目摘要：`{vault / DEFAULT_PROJECT_SUMMARY_REL}`
-- 当前记忆分类目录：`{vault / "20-Memory-记忆"}`
+- 当前记忆分类目录：`{vault / MEMORY_ROOT_REL / "20-Memory-记忆"}`
 - 当前主会话总结：`{vault / rel}`
 - 当前 Codex 记忆插件：自动安装到用户本机插件目录，通常是 `~/plugins/codian`。
 
@@ -234,13 +236,14 @@ def write_if_missing(path: Path, content: str) -> None:
 
 
 def write_default_vault_structure(vault: Path) -> None:
+    root = vault / MEMORY_ROOT_REL
     write_if_missing(
-        vault / "README.md",
+        root / "README.md",
         """# Codex
 
 ## 仓库用途
 
-这个仓库是 Codex 的本地长期记忆仓库，用来保存项目上下文、用户偏好、技术决策、待办、修复经验和会话日志。
+这个目录是 Codex/Codian 的本地长期记忆目录，用来保存项目上下文、用户偏好、技术决策、待办、修复经验和会话日志。
 
 ## 必读顺序
 
@@ -252,7 +255,7 @@ def write_default_vault_structure(vault: Path) -> None:
 """,
     )
     write_if_missing(
-        vault / "AGENTS.md",
+        root / "AGENTS.md",
         """# Codex 工作规则
 
 ## 启动必读
@@ -294,26 +297,26 @@ def write_default_vault_structure(vault: Path) -> None:
         ("40-Workflows-工作流/README.md", "40-Workflows-工作流", "Codex 执行任务、读写记忆、同步仓库的流程。"),
         ("90-Archive-归档/README.md", "90-Archive-归档", "旧结构说明和低频历史归档。"),
     ]:
-        write_if_missing(vault / rel, f"# {title}\n\n## 用途\n\n{purpose}\n")
+        write_if_missing(root / rel, f"# {title}\n\n## 用途\n\n{purpose}\n")
     write_if_missing(
         vault / DEFAULT_EXTRA_MEMORY_REL,
         """# Codex 记忆工作流
 
 ## 读取
 
-1. 先读 `README.md` 和 `AGENTS.md`。
-2. 再读 `10-Context-上下文/project-summary.md`。
-3. 根据任务关键词读取 `20-Memory-记忆/` 下的相关文件。
-4. 只有需要历史细节时，才读 `30-Logs-日志/codex-session-summary.md`。
+1. 先读 `codian/README.md` 和 `codian/AGENTS.md`。
+2. 再读 `codian/10-Context-上下文/project-summary.md`。
+3. 根据任务关键词读取 `codian/20-Memory-记忆/` 下的相关文件。
+4. 只有需要历史细节时，才读 `codian/30-Logs-日志/codex-session-summary.md`。
 
 ## 写回
 
-- 当前状态写入 `10-Context-上下文/project-summary.md`。
-- 偏好写入 `20-Memory-记忆/user-preferences.md`。
-- 决策写入 `20-Memory-记忆/decisions.md`。
-- 待办写入 `20-Memory-记忆/todos.md`。
-- 坑点和修复写入 `20-Memory-记忆/bugs-and-fixes.md`。
-- 长日志写入 `30-Logs-日志/codex-session-summary.md`。
+- 当前状态写入 `codian/10-Context-上下文/project-summary.md`。
+- 偏好写入 `codian/20-Memory-记忆/user-preferences.md`。
+- 决策写入 `codian/20-Memory-记忆/decisions.md`。
+- 待办写入 `codian/20-Memory-记忆/todos.md`。
+- 坑点和修复写入 `codian/20-Memory-记忆/bugs-and-fixes.md`。
+- 长日志写入 `codian/30-Logs-日志/codex-session-summary.md`。
 """,
     )
 
@@ -597,9 +600,9 @@ source: `{source_path.relative_to(vault_path())}`
 
 ## 读取建议
 
-- 进入仓库时先读取根目录 `README.md` 和 `AGENTS.md`，再读取本文件。
-- 需要偏好、决策、待办、修复记录或工作流时，按任务读取 `20-Memory-记忆/`、`40-Workflows-工作流/`。
-- 需要细节时再读取 `30-Logs-日志/codex-session-summary.md` 的启动必读和关键词命中的 1-3 条日志。
+- 进入仓库时先读取 `codian/README.md` 和 `codian/AGENTS.md`，再读取本文件。
+- 需要偏好、决策、待办、修复记录或工作流时，按任务读取 `codian/20-Memory-记忆/`、`codian/40-Workflows-工作流/`。
+- 需要细节时再读取 `codian/30-Logs-日志/codex-session-summary.md` 的启动必读和关键词命中的 1-3 条日志。
 - 除非用户明确要求，不要完整读取全部历史。
 """
     out_path.write_text(body, encoding="utf-8")
@@ -668,7 +671,8 @@ def read_memory(
 
 def append_summary(summary: str, tags: str, source: str, keywords: str) -> None:
     path = memory_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
+    if not path.exists():
+        ensure_memory_note()
     existing = path.read_text(encoding="utf-8") if path.exists() else "# Codex Session Summary\n\n## 会话日志\n"
     summary = summary.replace("\\n", "\n")
     ts = now_iso()
@@ -715,8 +719,8 @@ def main() -> None:
     read_p.add_argument("--full", action="store_true")
     read_p.add_argument("--query", default="", help="Optional keywords for retrieving 1-3 matching history blocks.")
     read_p.add_argument("--logs-limit", type=int, default=3, help="Maximum matched history blocks to include.")
-    read_p.add_argument("--no-project-summary", action="store_true", help="Do not include 10-Context-上下文/project-summary.md in compact reads.")
-    read_p.add_argument("--no-categories", action="store_true", help="Do not include matching 20-Memory-记忆 category files.")
+    read_p.add_argument("--no-project-summary", action="store_true", help="Do not include codian/10-Context-上下文/project-summary.md in compact reads.")
+    read_p.add_argument("--no-categories", action="store_true", help="Do not include matching codian/20-Memory-记忆 category files.")
 
     append_p = sub.add_parser("append", help="Append a compact memory summary.")
     append_p.add_argument("--summary", required=True)
@@ -724,12 +728,12 @@ def main() -> None:
     append_p.add_argument("--source", default="当前 Codex 会话")
     append_p.add_argument("--keywords", default="Codex, Obsidian, memory")
 
-    summary_p = sub.add_parser("project-summary", help="Generate 10-Context-上下文/project-summary.md from the memory note.")
+    summary_p = sub.add_parser("project-summary", help="Generate codian/10-Context-上下文/project-summary.md from the memory note.")
     summary_p.add_argument("--project-name", default="")
     summary_p.add_argument("--output-rel", default=None)
     summary_p.add_argument("--max-logs", type=int, default=12)
 
-    categories_p = sub.add_parser("memory-categories", help="Generate categorized memory files under 20-Memory-记忆/.")
+    categories_p = sub.add_parser("memory-categories", help="Generate categorized memory files under codian/20-Memory-记忆/.")
     categories_p.add_argument("--max-logs", type=int, default=80)
 
     args = parser.parse_args()

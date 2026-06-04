@@ -1,6 +1,6 @@
 {
   "name": "codian",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Read and update Codex memory notes in the user's Obsidian vault.",
   "author": {
     "name": "zixiaomiao"
