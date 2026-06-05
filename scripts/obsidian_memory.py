@@ -11,7 +11,7 @@ from typing import List, Optional
 
 
 APP_NAME = "codian"
-MEMORY_ROOT_REL = Path("codian")
+MEMORY_ROOT_REL = Path("Codian Memory")
 ICLOUD_OBSIDIAN_ROOT = Path.home() / "Library/Mobile Documents/iCloud~md~obsidian/Documents"
 DEFAULT_MEMORY_REL = MEMORY_ROOT_REL / "30-Logs-日志/codex-session-summary.md"
 DEFAULT_PROJECT_SUMMARY_REL = MEMORY_ROOT_REL / "10-Context-上下文/project-summary.md"
@@ -105,6 +105,69 @@ def discover_vault() -> Optional[Path]:
     return canonical_vault_root(vaults[0]) if vaults else None
 
 
+def discover_vault_candidates() -> List[Path]:
+    seen = set()
+    found: List[Path] = []
+    for root in candidate_vaults():
+        if looks_like_vault(root):
+            canonical = canonical_vault_root(root)
+            key = str(canonical)
+            if key not in seen:
+                seen.add(key)
+                found.append(canonical)
+        if root.exists() and root.is_dir():
+            for child in sorted(root.iterdir()):
+                if looks_like_vault(child):
+                    canonical = canonical_vault_root(child)
+                    key = str(canonical)
+                    if key not in seen:
+                        seen.add(key)
+                        found.append(canonical)
+    return found
+
+
+def prompt_for_vault() -> Path:
+    if not os.isatty(0):
+        raise SystemExit(
+            "Obsidian vault not configured.\n"
+            "Run one of these:\n"
+            f"  python3 {Path(__file__).resolve()} init --vault /path/to/your/vault\n"
+            "  export OBSIDIAN_VAULT=/path/to/your/vault"
+        )
+
+    candidates = discover_vault_candidates()
+    print("First-time setup: where is your Obsidian vault?")
+    if candidates:
+        print("Detected candidates:")
+        for idx, candidate in enumerate(candidates, start=1):
+            print(f"  {idx}. {candidate}")
+        print("Press Enter to use 1, type a number, or paste a custom path.")
+    else:
+        print("No vault was auto-detected. Please paste your Obsidian vault path.")
+
+    raw = input("Vault path> ").strip()
+    if not raw and candidates:
+        chosen = candidates[0]
+    elif raw.isdigit() and candidates:
+        index = int(raw) - 1
+        if index < 0 or index >= len(candidates):
+            raise SystemExit("Invalid vault selection.")
+        chosen = candidates[index]
+    else:
+        chosen = Path(raw).expanduser()
+
+    chosen = canonical_vault_root(chosen)
+    if not chosen.exists():
+        raise SystemExit(f"Vault path does not exist: {chosen}")
+
+    config = load_config()
+    config["vault"] = str(chosen)
+    save_config(config)
+    print(f"Saved config: {config_path()}")
+    print(f"Vault: {chosen}")
+    return chosen
+
+
 def vault_path() -> Path:
     if os.environ.get("OBSIDIAN_VAULT"):
         return canonical_vault_root(Path(os.environ["OBSIDIAN_VAULT"]))
@@ -114,16 +177,7 @@ def vault_path() -> Path:
     if configured:
         return canonical_vault_root(Path(configured))
 
-    discovered = discover_vault()
-    if discovered:
-        return discovered
-
-    raise SystemExit(
-        "Obsidian vault not configured.\n"
-        "Run one of these:\n"
-        f"  python3 {Path(__file__).resolve()} init --vault /path/to/your/vault\n"
-        "  export OBSIDIAN_VAULT=/path/to/your/vault"
-    )
+    return prompt_for_vault()
 
 
 def memory_rel() -> Path:
@@ -186,17 +240,17 @@ def default_memory_template(vault: Path, rel: Path) -> str:
 - 记忆分类目录：`{(MEMORY_ROOT_REL / "20-Memory-记忆").as_posix()}/`
 - 主会话总结相对路径：`{rel.as_posix()}`
 - 用户偏好：回答尽量直接，中文为主，少废话；只有用户触发记忆写入关键词时，才进入 Codex 记忆写回流程；写入前需确认记录内容和最终写入文本。
-- 记忆读取策略：进入仓库时先读取 `codian/README.md`、`codian/AGENTS.md` 和项目摘要；再读本节和用户当前消息；按任务关键词检索相关条目；不要默认展开全部历史。
+- 记忆读取策略：进入仓库时先读取 `Codian Memory/README.md`、`Codian Memory/AGENTS.md` 和项目摘要；再读本节和用户当前消息；按任务关键词检索相关条目；不要默认展开全部历史。
 - 同步策略：当前插件不负责 Git 同步，只负责记忆读取、摘要、分类和追加。
 - 安全规则：不记录 API key、密码、token、订阅原文等敏感信息。
 - Codex 主要插件：`codian`。
 
 ## 读取策略
 
-- 普通任务：优先读取 `codian/README.md`、`codian/AGENTS.md` 和 `codian/10-Context-上下文/project-summary.md`。
-- 项目任务：优先读取 `codian/10-Context-上下文/project-summary.md`。
-- 分类读取：按任务类型读取 `codian/20-Memory-记忆/project.md`、`decisions.md`、`todos.md`、`bugs-and-fixes.md`、`user-preferences.md`。
-- 工作流任务：读取 `codian/40-Workflows-工作流/codex-memory-workflow.md`。
+- 普通任务：优先读取 `Codian Memory/README.md`、`Codian Memory/AGENTS.md` 和 `Codian Memory/10-Context-上下文/project-summary.md`。
+- 项目任务：优先读取 `Codian Memory/10-Context-上下文/project-summary.md`。
+- 分类读取：按任务类型读取 `Codian Memory/20-Memory-记忆/project.md`、`decisions.md`、`todos.md`、`bugs-and-fixes.md`、`user-preferences.md`。
+- 工作流任务：读取 `Codian Memory/40-Workflows-工作流/codex-memory-workflow.md`。
 - Obsidian/记忆任务：再检索 `obsidian`、`vault-structure`、`codex/memory`、`codian`。
 - 插件/记忆任务：再检索 `codex/plugin`、`codex/memory`、`codian`。
 - 旧问题复盘：只读取命中的 1-3 个历史日志块。
@@ -320,19 +374,19 @@ def write_default_vault_structure(vault: Path) -> None:
 
 ## 读取
 
-1. 先读 `codian/README.md` 和 `codian/AGENTS.md`。
-2. 再读 `codian/10-Context-上下文/project-summary.md`。
-3. 根据任务关键词读取 `codian/20-Memory-记忆/` 下的相关文件。
-4. 只有需要历史细节时，才读 `codian/30-Logs-日志/codex-session-summary.md`。
+1. 先读 `Codian Memory/README.md` 和 `Codian Memory/AGENTS.md`。
+2. 再读 `Codian Memory/10-Context-上下文/project-summary.md`。
+3. 根据任务关键词读取 `Codian Memory/20-Memory-记忆/` 下的相关文件。
+4. 只有需要历史细节时，才读 `Codian Memory/30-Logs-日志/codex-session-summary.md`。
 
 ## 写回
 
-- 当前状态写入 `codian/10-Context-上下文/project-summary.md`。
-- 偏好写入 `codian/20-Memory-记忆/user-preferences.md`。
-- 决策写入 `codian/20-Memory-记忆/decisions.md`。
-- 待办写入 `codian/20-Memory-记忆/todos.md`。
-- 坑点和修复写入 `codian/20-Memory-记忆/bugs-and-fixes.md`。
-- 长日志写入 `codian/30-Logs-日志/codex-session-summary.md`。
+- 当前状态写入 `Codian Memory/10-Context-上下文/project-summary.md`。
+- 偏好写入 `Codian Memory/20-Memory-记忆/user-preferences.md`。
+- 决策写入 `Codian Memory/20-Memory-记忆/decisions.md`。
+- 待办写入 `Codian Memory/20-Memory-记忆/todos.md`。
+- 坑点和修复写入 `Codian Memory/20-Memory-记忆/bugs-and-fixes.md`。
+- 长日志写入 `Codian Memory/30-Logs-日志/codex-session-summary.md`。
 """,
     )
 
@@ -616,9 +670,9 @@ source: `{source_path.relative_to(vault_path())}`
 
 ## 读取建议
 
-- 进入仓库时先读取 `codian/README.md` 和 `codian/AGENTS.md`，再读取本文件。
-- 需要偏好、决策、待办、修复记录或工作流时，按任务读取 `codian/20-Memory-记忆/`、`codian/40-Workflows-工作流/`。
-- 需要细节时再读取 `codian/30-Logs-日志/codex-session-summary.md` 的启动必读和关键词命中的 1-3 条日志。
+- 进入仓库时先读取 `Codian Memory/README.md` 和 `Codian Memory/AGENTS.md`，再读取本文件。
+- 需要偏好、决策、待办、修复记录或工作流时，按任务读取 `Codian Memory/20-Memory-记忆/`、`Codian Memory/40-Workflows-工作流/`。
+- 需要细节时再读取 `Codian Memory/30-Logs-日志/codex-session-summary.md` 的启动必读和关键词命中的 1-3 条日志。
 - 除非用户明确要求，不要完整读取全部历史。
 """
     out_path.write_text(body, encoding="utf-8")
@@ -626,8 +680,11 @@ source: `{source_path.relative_to(vault_path())}`
     return out_path
 
 
-def init(vault: str, memory: Optional[str], create: bool) -> None:
-    vault_dir = canonical_vault_root(Path(vault))
+def init(vault: Optional[str], memory: Optional[str], create: bool) -> None:
+    if vault:
+        vault_dir = canonical_vault_root(Path(vault))
+    else:
+        vault_dir = prompt_for_vault()
     if not vault_dir.exists():
         raise SystemExit(f"Vault path does not exist: {vault_dir}")
 
@@ -727,7 +784,7 @@ def main() -> None:
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     init_p = sub.add_parser("init", help="Save the Obsidian vault path for this computer.")
-    init_p.add_argument("--vault", required=True)
+    init_p.add_argument("--vault")
     init_p.add_argument("--memory-rel", default=None)
     init_p.add_argument("--no-create", action="store_true", help="Do not create the default memory note if it is missing.")
 
@@ -735,8 +792,8 @@ def main() -> None:
     read_p.add_argument("--full", action="store_true")
     read_p.add_argument("--query", default="", help="Optional keywords for retrieving 1-3 matching history blocks.")
     read_p.add_argument("--logs-limit", type=int, default=3, help="Maximum matched history blocks to include.")
-    read_p.add_argument("--no-project-summary", action="store_true", help="Do not include codian/10-Context-上下文/project-summary.md in compact reads.")
-    read_p.add_argument("--no-categories", action="store_true", help="Do not include matching codian/20-Memory-记忆 category files.")
+    read_p.add_argument("--no-project-summary", action="store_true", help="Do not include Codian Memory/10-Context-上下文/project-summary.md in compact reads.")
+    read_p.add_argument("--no-categories", action="store_true", help="Do not include matching Codian Memory/20-Memory-记忆 category files.")
 
     append_p = sub.add_parser("append", help="Append a compact memory summary.")
     append_p.add_argument("--summary", required=True)
@@ -744,12 +801,12 @@ def main() -> None:
     append_p.add_argument("--source", default="当前 Codex 会话")
     append_p.add_argument("--keywords", default="Codex, Obsidian, memory")
 
-    summary_p = sub.add_parser("project-summary", help="Generate codian/10-Context-上下文/project-summary.md from the memory note.")
+    summary_p = sub.add_parser("project-summary", help="Generate Codian Memory/10-Context-上下文/project-summary.md from the memory note.")
     summary_p.add_argument("--project-name", default="")
     summary_p.add_argument("--output-rel", default=None)
     summary_p.add_argument("--max-logs", type=int, default=12)
 
-    categories_p = sub.add_parser("memory-categories", help="Generate categorized memory files under codian/20-Memory-记忆/.")
+    categories_p = sub.add_parser("memory-categories", help="Generate categorized memory files under Codian Memory/20-Memory-记忆/.")
     categories_p.add_argument("--max-logs", type=int, default=80)
 
     args = parser.parse_args()

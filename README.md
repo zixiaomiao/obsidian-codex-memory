@@ -52,16 +52,7 @@ codian/
 
 ## 一行安装
 
-### 从 Release 下载后双击安装
-
-- macOS：下载 [`install-macos.command`](https://raw.githubusercontent.com/zixiaomiao/codian/main/release-assets/install-macos.command)，双击运行
-- Windows：下载 [`install-windows.cmd`](https://raw.githubusercontent.com/zixiaomiao/codian/main/release-assets/install-windows.cmd)，双击运行
-
-安装器会自动下载插件并注册到 Codex 的个人插件市场。
-
-也可以从 [Releases](https://github.com/zixiaomiao/codian/releases) 下载版本附件。
-
-### 复制命令安装
+直接复制命令给 Codex 或终端执行即可，不再依赖双击安装器。
 
 macOS 或 Linux：
 
@@ -75,7 +66,7 @@ Windows PowerShell：
 irm https://raw.githubusercontent.com/zixiaomiao/codian/main/install.ps1 | iex
 ```
 
-安装后配置你的 Obsidian vault：
+第一次使用时，脚本会先询问你的 Obsidian vault 路径。你也可以手动执行：
 
 ```bash
 python3 ~/.codex/skills/Codian/scripts/obsidian_memory.py init --vault "/path/to/your/Obsidian vault"
@@ -150,9 +141,9 @@ python3 ~/.codex/skills/Codian/scripts/obsidian_memory.py append --summary "5-8 
 
 简单说：它不是为了和"完全不读记忆"比较，而是把长期记忆成本从上万 token 压到一两千 token，同时保留必要上下文。
 
-## 安装脚本做了什么
+## 安装命令会做什么
 
-安装脚本会：
+安装命令会：
 
 - 把完整仓库同步到 `~/.codex/skills/Codian GitHub`
 - 把必要运行文件同步到 `~/.codex/skills/Codian`

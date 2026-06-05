@@ -52,14 +52,7 @@ If the vault lives inside the iCloud Obsidian container, first init creates `cod
 
 ## Install
 
-### Download release assets
-
-- macOS: download [`install-macos.command`](https://raw.githubusercontent.com/zixiaomiao/codian/main/release-assets/install-macos.command), then double-click it
-- Windows: download [`install-windows.cmd`](https://raw.githubusercontent.com/zixiaomiao/codian/main/release-assets/install-windows.cmd), then double-click it
-
-You can also download versioned assets from [Releases](https://github.com/zixiaomiao/codian/releases).
-
-### One-line install
+Copy the command below into Codex or your terminal. No double-click installer is required.
 
 macOS or Linux:
 
@@ -73,7 +66,7 @@ Windows PowerShell:
 irm https://raw.githubusercontent.com/zixiaomiao/codian/main/install.ps1 | iex
 ```
 
-Configure your Obsidian vault:
+On first use, the script asks for your Obsidian vault path. You can also run this manually:
 
 ```bash
 python3 ~/.codex/skills/Codian/scripts/obsidian_memory.py init --vault "/path/to/your/Obsidian vault"
@@ -140,7 +133,7 @@ python3 ~/.codex/skills/Codian/scripts/obsidian_memory.py append --summary "5-8 
 - Python 3
 - A local Obsidian vault
 
-## What the installer does
+## What the install command does
 
 - Syncs the full repository into `~/.codex/skills/Codian GitHub`.
 - Syncs the required runtime files into `~/.codex/skills/Codian`.

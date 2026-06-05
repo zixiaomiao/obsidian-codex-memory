@@ -1,8 +1,15 @@
 # Release Assets
 
-Download the installer for your system and run it directly:
+Codian now prefers one-line install commands instead of bundled double-click installers.
 
-- macOS: `install-macos.command`
-- Windows: `install-windows.cmd`
+macOS or Linux:
 
-The installers sync the full repository into `~/.codex/skills/Codian GitHub`, copy only the runtime skill files into `~/.codex/skills/Codian`, and register Codian in the Codex personal marketplace.
+```bash
+curl -fsSL https://raw.githubusercontent.com/zixiaomiao/codian/main/install.sh | bash
+```
+
+Windows PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/zixiaomiao/codian/main/install.ps1 | iex
+```
