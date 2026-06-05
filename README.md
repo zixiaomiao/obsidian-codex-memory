@@ -78,13 +78,13 @@ irm https://raw.githubusercontent.com/zixiaomiao/codian/main/install.ps1 | iex
 安装后配置你的 Obsidian vault：
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py init --vault "/path/to/your/Obsidian vault"
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py init --vault "/path/to/your/Obsidian vault"
 ```
 
 Windows：
 
 ```powershell
-python "$env:USERPROFILE\.codex\skills\codian\scripts\obsidian_memory.py" init --vault "D:\path\to\your\Obsidian vault"
+python "$env:USERPROFILE\.codex\skills\codin\scripts\obsidian_memory.py" init --vault "D:\path\to\your\Obsidian vault"
 ```
 
 你也可以不写入本地配置，直接在 shell 环境里设置 `OBSIDIAN_VAULT`。
@@ -94,37 +94,37 @@ python "$env:USERPROFILE\.codex\skills\codian\scripts\obsidian_memory.py" init -
 读取精简记忆：
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py read
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py read
 ```
 
 生成或刷新项目摘要：
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py project-summary
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py project-summary
 ```
 
 生成或刷新分类记忆：
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py memory-categories
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py memory-categories
 ```
 
 按关键词读取相关历史，默认最多 3 条：
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py read --query "obsidian memory plugin"
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py read --query "obsidian memory plugin"
 ```
 
 读取完整记忆日志：
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py read --full
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py read --full
 ```
 
 追加一条总结：
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py append --summary "5-8 行长期有用的 session summary"
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py append --summary "5-8 行长期有用的 session summary"
 ```
 
 ## Token 节省策略
@@ -154,11 +154,12 @@ python3 ~/.codex/skills/codian/scripts/obsidian_memory.py append --summary "5-8 
 
 安装脚本会：
 
-- 把这个仓库内容克隆或更新到 `~/.codex/skills/codian`
+- 把完整仓库同步到 `~/.codex/skills/codin GitHub`
+- 把必要运行文件同步到 `~/.codex/skills/codin`
 - 创建或更新 `~/.agents/plugins/marketplace.json`
 - 把插件注册到 Codex 的个人插件市场
 
-安装后，Codex 直接从 `~/.codex/skills/codian` 读取这个插件，根目录里的 `SKILL.md` 就是 skill 本体。
+安装后，Codex 直接从 `~/.codex/skills/codin` 读取这个插件，根目录里的 `SKILL.md` 就是 skill 本体；`~/.codex/skills/codin GitHub` 保留仓库和发布文件。
 
 ## 环境要求
 

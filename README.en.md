@@ -76,13 +76,13 @@ irm https://raw.githubusercontent.com/zixiaomiao/codian/main/install.ps1 | iex
 Configure your Obsidian vault:
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py init --vault "/path/to/your/Obsidian vault"
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py init --vault "/path/to/your/Obsidian vault"
 ```
 
 Windows:
 
 ```powershell
-python "$env:USERPROFILE\.codex\skills\codian\scripts\obsidian_memory.py" init --vault "D:\path\to\your\Obsidian vault"
+python "$env:USERPROFILE\.codex\skills\codin\scripts\obsidian_memory.py" init --vault "D:\path\to\your\Obsidian vault"
 ```
 
 You may also set `OBSIDIAN_VAULT` instead of writing local config.
@@ -92,37 +92,37 @@ You may also set `OBSIDIAN_VAULT` instead of writing local config.
 Read compact memory:
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py read
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py read
 ```
 
 Generate or refresh the project summary:
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py project-summary
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py project-summary
 ```
 
 Generate or refresh categorized memory:
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py memory-categories
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py memory-categories
 ```
 
 Read matched history, up to 3 blocks by default:
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py read --query "obsidian memory plugin"
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py read --query "obsidian memory plugin"
 ```
 
 Read the full memory log:
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py read --full
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py read --full
 ```
 
 Append a summary:
 
 ```bash
-python3 ~/.codex/skills/codian/scripts/obsidian_memory.py append --summary "5-8 lines of durable session memory"
+python3 ~/.codex/skills/codin/scripts/obsidian_memory.py append --summary "5-8 lines of durable session memory"
 ```
 
 ## Token Saving Strategy
@@ -142,10 +142,11 @@ python3 ~/.codex/skills/codian/scripts/obsidian_memory.py append --summary "5-8 
 
 ## What the installer does
 
-- Clones or updates this repository contents into `~/.codex/skills/codian`.
+- Syncs the full repository into `~/.codex/skills/codin GitHub`.
+- Syncs the required runtime files into `~/.codex/skills/codin`.
 - Registers Codin in the Codex personal marketplace.
 
-After installation, Codex reads the plugin directly from `~/.codex/skills/codian`, and the root-level `SKILL.md` is the skill definition.
+After installation, Codex reads the plugin directly from `~/.codex/skills/codin`, and the root-level `SKILL.md` is the skill definition. The `~/.codex/skills/codin GitHub` folder keeps the repository and release assets.
 
 ## License
 

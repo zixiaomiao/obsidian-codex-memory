@@ -2,9 +2,10 @@
 setlocal
 
 set "REPO_URL=https://github.com/zixiaomiao/codian.git"
-set "PLUGIN_NAME=codian"
+set "PLUGIN_NAME=codin"
 set "CODEX_HOME=%USERPROFILE%\.codex"
 set "SKILL_DIR=%CODEX_HOME%\skills\%PLUGIN_NAME%"
+set "GITHUB_DIR=%CODEX_HOME%\skills\%PLUGIN_NAME% GitHub"
 set "MARKETPLACE_PATH=%USERPROFILE%\.agents\plugins\marketplace.json"
 
 where git >nul 2>nul
@@ -25,17 +26,25 @@ if errorlevel 1 (
 
 if not exist "%CODEX_HOME%\skills" mkdir "%CODEX_HOME%\skills"
 
-if exist "%SKILL_DIR%\.git" (
+if exist "%GITHUB_DIR%\.git" (
   echo Updating existing plugin...
-  git -C "%SKILL_DIR%" pull --ff-only
+  git -C "%GITHUB_DIR%" pull --ff-only
 ) else (
-  if exist "%SKILL_DIR%" (
+  if exist "%GITHUB_DIR%" (
     echo Refreshing existing plugin directory...
-    rmdir /s /q "%SKILL_DIR%"
+    rmdir /s /q "%GITHUB_DIR%"
   )
   echo Downloading plugin...
-  git clone "%REPO_URL%" "%SKILL_DIR%"
+  git clone "%REPO_URL%" "%GITHUB_DIR%"
 )
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$githubDir='%GITHUB_DIR%';" ^
+  "$skillDir='%SKILL_DIR%';" ^
+  "if (Test-Path $skillDir) { Remove-Item -Recurse -Force $skillDir };" ^
+  "New-Item -ItemType Directory -Force -Path $skillDir | Out-Null;" ^
+  "$items = @('SKILL.md','scripts','references','assets','agents');" ^
+  "foreach ($item in $items) { $src = Join-Path $githubDir $item; if (Test-Path $src) { Copy-Item $src -Destination $skillDir -Recurse -Force } }"
 
 for %%I in ("%MARKETPLACE_PATH%") do if not exist "%%~dpI" mkdir "%%~dpI"
 
@@ -56,6 +65,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
 echo.
 echo Installed Codin.
 echo Skill path: %SKILL_DIR%
+echo GitHub copy: %GITHUB_DIR%
 echo.
 echo Next step:
 echo   Open Codex, enable Codin, then configure your Obsidian vault if needed.

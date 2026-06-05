@@ -20,7 +20,7 @@ script = Path(os.path.dirname(os.path.dirname(__file__))) / "scripts" / "obsidia
 ```
 
 Or reference by relative path from the skill directory:
-`$CODEX_HOME/skills/codian/scripts/obsidian_memory.py`
+`$CODEX_HOME/skills/codin/scripts/obsidian_memory.py`
 
 ## Vault Configuration
 

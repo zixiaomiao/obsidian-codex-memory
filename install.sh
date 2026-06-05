@@ -2,9 +2,10 @@
 set -euo pipefail
 
 REPO_URL="${CODIA_REPO:-https://github.com/zixiaomiao/codian.git}"
-PLUGIN_NAME="codian"
+PLUGIN_NAME="codin"
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 SKILL_DIR="${CODIA_SKILL_DIR:-$CODEX_HOME/skills/$PLUGIN_NAME}"
+GITHUB_DIR="${CODIA_GITHUB_DIR:-$CODEX_HOME/skills/${PLUGIN_NAME} GitHub}"
 MARKETPLACE_PATH="${CODIA_MARKETPLACE:-$HOME/.agents/plugins/marketplace.json}"
 SOURCE_PATH="$SKILL_DIR"
 
@@ -20,15 +21,39 @@ need python3
 
 mkdir -p "$(dirname "$SKILL_DIR")"
 
-if [ -d "$SKILL_DIR/.git" ]; then
-  git -C "$SKILL_DIR" pull --ff-only
-elif [ -d "$SKILL_DIR" ]; then
-  echo "Refreshing existing Codin directory: $SKILL_DIR"
-  rm -rf "$SKILL_DIR"
-  git clone "$REPO_URL" "$SKILL_DIR"
+if [ -d "$GITHUB_DIR/.git" ]; then
+  git -C "$GITHUB_DIR" pull --ff-only
+elif [ -d "$GITHUB_DIR" ]; then
+  echo "Refreshing existing Codin GitHub directory: $GITHUB_DIR"
+  rm -rf "$GITHUB_DIR"
+  git clone "$REPO_URL" "$GITHUB_DIR"
 else
-  git clone "$REPO_URL" "$SKILL_DIR"
+  git clone "$REPO_URL" "$GITHUB_DIR"
 fi
+
+python3 - "$GITHUB_DIR" "$SKILL_DIR" <<'PY'
+import shutil
+import sys
+from pathlib import Path
+
+github_dir = Path(sys.argv[1]).expanduser()
+skill_dir = Path(sys.argv[2]).expanduser()
+
+if skill_dir.exists() or skill_dir.is_symlink():
+    if skill_dir.is_symlink() or skill_dir.is_file():
+        skill_dir.unlink()
+    else:
+        shutil.rmtree(skill_dir)
+
+skill_dir.mkdir(parents=True, exist_ok=True)
+
+for name in ("SKILL.md", "scripts", "references", "assets", "agents"):
+    src = github_dir / name
+    if src.is_file():
+        shutil.copy2(src, skill_dir / src.name)
+    elif src.is_dir():
+        shutil.copytree(src, skill_dir / src.name)
+PY
 
 mkdir -p "$(dirname "$MARKETPLACE_PATH")"
 
@@ -86,6 +111,9 @@ cat <<EOF
 
 Installed $PLUGIN_NAME at:
   $SKILL_DIR
+
+GitHub copy:
+  $GITHUB_DIR
 
 Next, configure your Obsidian vault if you have not already:
   python3 "$SKILL_DIR/scripts/obsidian_memory.py" init --vault "/path/to/your/Obsidian vault"

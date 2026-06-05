@@ -2,9 +2,10 @@
 set -e
 
 REPO_URL="https://github.com/zixiaomiao/codian.git"
-PLUGIN_NAME="codian"
+PLUGIN_NAME="codin"
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 SKILL_DIR="$CODEX_HOME/skills/$PLUGIN_NAME"
+GITHUB_DIR="$CODEX_HOME/skills/${PLUGIN_NAME} GitHub"
 MARKETPLACE_PATH="$HOME/.agents/plugins/marketplace.json"
 
 cd "$HOME"
@@ -24,17 +25,25 @@ fi
 
 mkdir -p "$(dirname "$SKILL_DIR")"
 
-if [ -d "$SKILL_DIR/.git" ]; then
+if [ -d "$GITHUB_DIR/.git" ]; then
   echo "Updating existing plugin..."
-  git -C "$SKILL_DIR" pull --ff-only
-elif [ -d "$SKILL_DIR" ]; then
+  git -C "$GITHUB_DIR" pull --ff-only
+elif [ -d "$GITHUB_DIR" ]; then
   echo "Refreshing existing plugin directory..."
-  rm -rf "$SKILL_DIR"
-  git clone "$REPO_URL" "$SKILL_DIR"
+  rm -rf "$GITHUB_DIR"
+  git clone "$REPO_URL" "$GITHUB_DIR"
 else
   echo "Downloading plugin..."
-  git clone "$REPO_URL" "$SKILL_DIR"
+  git clone "$REPO_URL" "$GITHUB_DIR"
 fi
+
+rm -rf "$SKILL_DIR"
+mkdir -p "$SKILL_DIR"
+for item in SKILL.md scripts references assets agents; do
+  if [ -e "$GITHUB_DIR/$item" ]; then
+    cp -R "$GITHUB_DIR/$item" "$SKILL_DIR/"
+  fi
+done
 
 mkdir -p "$(dirname "$MARKETPLACE_PATH")"
 
@@ -87,6 +96,7 @@ PY
 echo
 echo "Installed Codin."
 echo "Skill path: $SKILL_DIR"
+echo "GitHub copy: $GITHUB_DIR"
 echo
 echo "Next step:"
 echo "  Open Codex, enable Codin, then configure your Obsidian vault if needed."

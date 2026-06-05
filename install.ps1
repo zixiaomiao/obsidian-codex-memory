@@ -1,9 +1,10 @@
 $ErrorActionPreference = "Stop"
 
 $RepoUrl = if ($env:CODIA_REPO) { $env:CODIA_REPO } else { "https://github.com/zixiaomiao/codian.git" }
-$PluginName = "codian"
+$PluginName = "codin"
 $CodexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $env:USERPROFILE ".codex" }
 $SkillDir = if ($env:CODIA_SKILL_DIR) { $env:CODIA_SKILL_DIR } else { Join-Path $CodexHome "skills\$PluginName" }
+$GithubDir = if ($env:CODIA_GITHUB_DIR) { $env:CODIA_GITHUB_DIR } else { Join-Path $CodexHome "skills\$PluginName GitHub" }
 $MarketplacePath = if ($env:CODIA_MARKETPLACE) { $env:CODIA_MARKETPLACE } else { Join-Path $env:USERPROFILE ".agents\plugins\marketplace.json" }
 $SourcePath = $SkillDir
 
@@ -16,15 +17,29 @@ function Require-Command($Name) {
 Require-Command git
 Require-Command python
 
-New-Item -ItemType Directory -Force -Path (Split-Path $SkillDir) | Out-Null
+New-Item -ItemType Directory -Force -Path (Split-Path $GithubDir) | Out-Null
 
-if (Test-Path (Join-Path $SkillDir ".git")) {
-  git -C $SkillDir pull --ff-only
-} elseif (Test-Path $SkillDir) {
-  Remove-Item -Recurse -Force $SkillDir
-  git clone $RepoUrl $SkillDir
+if (Test-Path (Join-Path $GithubDir ".git")) {
+  git -C $GithubDir pull --ff-only
+} elseif (Test-Path $GithubDir) {
+  Remove-Item -Recurse -Force $GithubDir
+  git clone $RepoUrl $GithubDir
 } else {
-  git clone $RepoUrl $SkillDir
+  git clone $RepoUrl $GithubDir
+}
+
+if (Test-Path $SkillDir) {
+  Remove-Item -Recurse -Force $SkillDir
+}
+
+New-Item -ItemType Directory -Force -Path $SkillDir | Out-Null
+
+$CopyItems = @("SKILL.md", "scripts", "references", "assets", "agents")
+foreach ($Item in $CopyItems) {
+  $SourceItem = Join-Path $GithubDir $Item
+  if (Test-Path $SourceItem) {
+    Copy-Item $SourceItem -Destination $SkillDir -Recurse -Force
+  }
 }
 
 New-Item -ItemType Directory -Force -Path (Split-Path $MarketplacePath) | Out-Null
@@ -84,6 +99,9 @@ if ($env:OBSIDIAN_VAULT) {
 Write-Host ""
 Write-Host "Installed $PluginName at:"
 Write-Host "  $SkillDir"
+Write-Host ""
+Write-Host "GitHub copy:"
+Write-Host "  $GithubDir"
 Write-Host ""
 Write-Host "Next, configure your Obsidian vault if you have not already:"
 Write-Host "  python `"$SkillDir\scripts\obsidian_memory.py`" init --vault `"D:\path\to\your\Obsidian vault`""
