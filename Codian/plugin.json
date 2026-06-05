@@ -1,0 +1,18 @@
+{
+  "name": "Codian",
+  "version": "1.0.2",
+  "description": "Read and update Codex memory notes in the user's Obsidian vault.",
+  "author": {
+    "name": "zixiaomiao"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codian",
+    "shortDescription": "Obsidian long-term memory for Codex.",
+    "longDescription": "Reads Codex memory from Obsidian, appends compact session summaries, and syncs to your vault. Simple, structured, markdown-first.",
+    "developerName": "zixiaomiao",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "用我的 Obsidian 记忆继续"
+  }
+}
